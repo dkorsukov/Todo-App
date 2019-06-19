@@ -14,7 +14,7 @@ module.exports = {
 	entry: "./src/index.js",
 
 	output: {
-		path: path.resolve(__dirname, "./build"),
+		path: path.resolve(__dirname, "build"),
 		filename: "build.min.js"
 	},
 
@@ -23,7 +23,6 @@ module.exports = {
 	devServer: {
 		host: "127.0.0.1",
 		port: 8080,
-		overlay: true,
 		hot: true
 	},
 
@@ -37,6 +36,8 @@ module.exports = {
 
 	plugins: [
 		new webpack.HotModuleReplacementPlugin(),
+		new webpack.NamedModulesPlugin(),
+		new webpack.NoEmitOnErrorsPlugin(),
 		new HTMLWebpackPlugin({
 			template: "./src/index.pug",
 			filename: "index.html",
@@ -65,7 +66,7 @@ module.exports = {
 				test: /\.vue$/,
 				loader: "vue-loader",
 				options: {
-					hotReload: dev
+					hotReload: true
 				}
 			},
 			{

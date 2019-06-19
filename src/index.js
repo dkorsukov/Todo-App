@@ -14,3 +14,7 @@ new Vue({
 	store,
 	router
 }).$mount("#app");
+
+if (module.hot) {
+	module.hot.accept();
+}

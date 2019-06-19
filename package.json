@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/index.js",
   "scripts": {
-    "dev-server": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+    "dev-server": "cross-env NODE_ENV=development webpack-dev-server --open",
     "build-project": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "author": "",
@@ -43,5 +43,6 @@
     "webpack": "^4.34.0",
     "webpack-cli": "^3.3.4",
     "webpack-dev-server": "^3.7.1"
-  }
+  },
+  "browserslist": ["> 1%", "last 2 versions"]
 }
