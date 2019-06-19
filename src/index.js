@@ -2,11 +2,8 @@ import Vue from "vue";
 
 import Vuetify from "vuetify";
 import "vuetify/dist/vuetify.min.css";
-import "material-design-icons-iconfont/dist/material-design-icons.css";
 
-Vue.use(Vuetify, {
-	iconsfont: "mdi"
-});
+Vue.use(Vuetify);
 
 import store from "./store/index.js";
 import router from "./router/index.js";
