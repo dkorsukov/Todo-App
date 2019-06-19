@@ -1,3 +1,3 @@
 module.exports = {
-	"presets": ["@babel/preset-env", "babel-preset-latest", "@vue/babel-preset-jsx", "minify"]
+	"presets": ["@babel/preset-env", "@vue/babel-preset-jsx"]
 };

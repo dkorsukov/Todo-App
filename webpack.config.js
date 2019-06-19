@@ -21,7 +21,7 @@ module.exports = {
 	devtool: dev ? "source-map" : "",
 
 	devServer: {
-		host: "http://192.168.1.4",
+		host: "127.0.0.1",
 		port: 8080,
 		overlay: true,
 		hot: true
@@ -30,7 +30,8 @@ module.exports = {
   resolve: {
     extensions: [".js", ".vue", ".json"],
     alias: {
-			"@components": path.resolve(__dirname, "src/components")
+			"@components": path.resolve(__dirname, "src/components"),
+			"@api": path.resolve(__dirname, "src/api")
     }
   },
 
@@ -115,10 +116,7 @@ module.exports = {
 		minimizer: [
 			new UglifyJSWebpackPlugin({
 				test: /\.js$/,
-      	sourceMap: true,
-      	compress: {
-      	  warnings: false
-				}
+      	sourceMap: true
 			})	
 		]
 	}		
