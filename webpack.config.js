@@ -15,7 +15,7 @@ module.exports = {
 
 	output: {
 		path: path.resolve(__dirname, "build"),
-		filename: "build.min.js"
+		filename: dev ? "build.js" : "build.min.js"
 	},
 
 	devtool: dev ? "source-map" : "",
@@ -44,7 +44,7 @@ module.exports = {
 			minify: !dev
 		}),
 		new MiniCSSExtractPlugin({
-			filename: "build.min.css"
+			filename: dev ? "build.css" : "build.min.css"
 		}),
 		new VueLoaderPlugin(),
 		new ImageminWebpackPlugin({
@@ -94,7 +94,7 @@ module.exports = {
 				use: {
 					loader: "file-loader",
 					options: {
-						name: "./images/[name].[ext]"
+						name: "[path][name].[ext]"
 					}
 				}
 			},			
