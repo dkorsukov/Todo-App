@@ -11,6 +11,8 @@ let MiniCSSExtractPlugin = require("mini-css-extract-plugin"),
 let dev = process.env.NODE_ENV === "development";
 
 module.exports = {
+	mode: dev ? "development" : "production",
+
 	entry: "./src/index.js",
 
 	output: {
