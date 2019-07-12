@@ -1,5 +1,5 @@
 <template lang="pug">
-	create-account-popup
+	create-account
 </template>
 
 <script>
@@ -7,7 +7,7 @@
 
 	export default {
 		components: {
-			createAccountPopup
+			createAccount
 		}
 	}
 </script>
