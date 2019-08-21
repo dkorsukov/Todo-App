@@ -32,10 +32,11 @@ export default {
 			commit( "setUserRegistrationDate", parseInt(regTime) );			
 		},
 
-		signIn({ commit, dispatch }, email) {		
+		signIn({ commit, dispatch }, email) {
 			let docRef = api.database.collection("users").doc(email);
 			commit("setUserDocRef", docRef);
-			
+			dispatch("getFolders");
+
 			// prefix for local storage props
 			let prefix = "todo-app/user-data",
 					name = localStorage.getItem(`${prefix}/name`),
