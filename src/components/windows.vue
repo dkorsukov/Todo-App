@@ -1,13 +1,20 @@
 <template lang="pug">
-	create-account
+	.windows
+		create-account
+		create-folder
+		create-todo
 </template>
 
 <script>
 	import createAccount from "./windows/create_account.vue";
+	import createFolder from "./windows/create_folder.vue";
+	import createTodo from "./windows/create_todo.vue";
 
 	export default {
 		components: {
-			createAccount
+			createAccount,
+			createFolder,
+			createTodo
 		}
 	}
 </script>
