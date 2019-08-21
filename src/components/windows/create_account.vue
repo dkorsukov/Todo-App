@@ -81,11 +81,9 @@
 				},
 
 				set(value) {
-					if (value === true) {
-						this.$store.commit("openCreatingAccountPopup");
-					} else {
-						this.$store.commit("closeCreatingAccountPopup");
+					this.$store.commit("setCreatingAccountPopup", !!value);
 
+					if (!value) {
 						this.$refs.creatingAccountForm.reset();
 					}
 				}
