@@ -11,6 +11,8 @@ let MiniCSSExtractPlugin = require("mini-css-extract-plugin"),
 let dev = process.env.NODE_ENV === "development";
 
 module.exports = {
+	mode: dev ? "development" : "production",
+
 	entry: "./src/index.js",
 
 	output: {
@@ -99,7 +101,7 @@ module.exports = {
 				}
 			},			
 			{
-				test: /\.(ttf|woff|woff2)$/,
+				test: /\.(ttf|woff|woff2|eot)$/,
 				use: [{
 					loader: "file-loader",
 					options: {
