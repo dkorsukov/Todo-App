@@ -1,7 +1,7 @@
 <template lang="pug">
 	v-layout(column, justify-center)
 		v-flex(md12, align-self-end)
-			v-btn(color="primary", small, @click="$store.commit('openCreatingAccountPopup')") Sign Up
+			v-btn(color="primary", small, @click="$store.commit('setCreatingAccountPopup', true)") Sign Up
 		v-flex(md12)
 			v-alert(type="error", :value="showError") {{ errorText }}			
 		v-flex(md12)
@@ -43,16 +43,13 @@
 
 					api.signInUser(this.email, this.password)
 						.catch( (err) => {
-							switch (err.code) {
-								case "auth/wrong-password":
-									this.errorText = "Incorrent e-mail or password";
-								break;
-								case "auth/user-not-found":
-									this.errorText = "Incorrent e-mail or password";
-								break;
-								default:
-									this.errorText = "Error";		
+							if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+								this.errorText = "Incorrent e-mail or password";
+							} else {
+								this.errorText = err.code;
 							}
+
+							this.$store.commit("setUserSectionProgressBar", false);
 						} );
 				}
 			}

@@ -28,7 +28,17 @@
 
 		components: {
 			userAuth, userInfo
-		}	
+		},
+		
+		mounted() {
+			api.auth.onAuthStateChanged( (user) => {
+				if (user) {
+					this.$store.dispatch("signIn", user.email);
+				} 
+
+				this.$store.commit("setUserSectionProgressBar", false);
+			} );
+		}		
 	}
 </script>
 
