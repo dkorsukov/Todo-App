@@ -1,15 +1,21 @@
 export default {
 	state: {
-		creatingAccount: false
+		creatingAccount: false,
+		creatingFolder: false,
+		creatingTodo: false
 	},
 
 	mutations: {
-		openCreatingAccountPopup(state) {
-			state.creatingAccount = true;
+		setCreatingAccountPopup(state, value) {
+			state.creatingAccount = value;
 		},
-	
-		closeCreatingAccountPopup(state) {
-			state.creatingAccount = false;
-		}			
+
+		setCreatingFolderPopup(state, value) {
+			state.creatingFolder = value;
+		},
+
+		setCreatingTodoPopup(state, value) {
+			state.creatingTodo = value;
+		}
 	}
 };
