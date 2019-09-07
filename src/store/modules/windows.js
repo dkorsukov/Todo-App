@@ -1,6 +1,7 @@
 export default {
 	state: {
 		creatingAccount: false,
+		resetPassword: false,
 		creatingFolder: false,
 		creatingTodo: false
 	},
@@ -8,6 +9,10 @@ export default {
 	mutations: {
 		setCreatingAccountPopup(state, value) {
 			state.creatingAccount = value;
+		},
+
+		setResetPasswordPopup(state, value) {
+			state.resetPassword = value;
 		},
 
 		setCreatingFolderPopup(state, value) {
