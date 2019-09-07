@@ -13,7 +13,7 @@ import windows from "./modules/windows.js";
 export default new Vuex.Store({
 	state: {
 		navigationVisibility: false,
-		mobileBreakPoint: 1024
+		mobileBreakPoint: 1040
 	},
 
 	mutations, actions,
