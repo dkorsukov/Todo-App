@@ -6,7 +6,7 @@
 																							color="primary",
 																							:height="4" 
 																							indeterminate)
-			tools
+			tools(v-if="showMainSectionTools")
 			todo-list
 			v-speed-dial.create-todo-btn(fixed, bottom, right, 
 																	v-if="isCurrentFolderLoaded")
@@ -31,8 +31,13 @@
 		computed: {
 			...mapState({
 				isCurrentFolderLoaded: (state) => state.folders.isCurrentFolderLoaded,
+				currentFolderIndex: (state) => state.folders.currentFolderIndex,
 				progressBar: (state) => state.bars.mainSection
-			})
+			}),
+
+			showMainSectionTools() {
+				return this.currentFolderIndex !== null;
+			}
 		},
 
 		components: {
