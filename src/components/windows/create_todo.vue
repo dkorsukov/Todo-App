@@ -1,98 +1,224 @@
 <template lang="pug">
-	v-dialog(v-model="visible", :persistent="true", :maxWidth="700")
-		v-card
-			v-card-title
-				v-icon.offset-left(medium) add
-				span.offset-all.headline Create Task
-			v-divider
-			v-alert(type="error", :value="showError") Error: {{ errorText }}
-			v-container(fluid, pa-1, grid-list-md)
-				v-card-text
-					v-layout(row, justify-center, align-center)
-						v-flex(md11)
-							v-form(ref="creatingTodoForm")
-								v-text-field(v-model="titleInputValue", label="Title")
-								v-slider(v-model="priorityInputValue", :thumb-size="25",
-												:min="1", :max="9", label="Priority")
-									template(#thumb-label)
-										span {{ priorityInputValue }}
-								v-textarea(label="Description",
-													v-model="descriptionInputValue")
-								v-radio-group(v-model="timeMode", row)
-									v-radio(color="primary", label="Until", :value="0")
-									v-radio(color="primary", label="Interval", :value="1")
-								.until(v-if="until")
-									v-layout(row)
-										v-flex(md5)
-											v-menu(:close-on-content-click="true")
-												template(#activator="{ on }")
-													v-text-field(v-model="untilDatePickerValue", v-on="on",
-																			readonly, prepend-icon="date_range",
-																			label="Select Date")
-												v-date-picker(v-model="untilDatePickerValue", 
-																			color="primary", no-title, scrollable)
-										v-flex.ml-1(md5)
-											v-menu(:close-on-content-click="false", ref="timePickerMenu")
-												template(#activator="{ on }")
-													v-text-field(v-model="untilTimePickerValue", v-on="on",
-																			readonly, prepend-icon="access_time",
-																			label="Select Time")
-												v-time-picker(v-model="untilTimePickerValue", 
-																			color="primary", scrollable,
-																			@click:minute="$refs.timePickerMenu.save(untilTimePickerValue)")
-								.interval(v-if="interval")
-					v-layout(row, justify-end)
-						v-btn(flat, :disabled="inProgress", @click="visible = false") Cancel
-						v-btn(color="primary", :disabled="inProgress", :loading="inProgress", @click="createTodo") Confirm	
+	popup-component(name="creatingTodo",
+									ref="creatingTodoPopup",
+									:inProgress="inProgress",
+									@close="resetForm",
+									@confirm="createTodo")
+		template(#title)
+			v-icon.offset-left(medium) add
+			span.offset-all.headline Create new task
+		template(#content)
+			v-form(ref="creatingTodoForm")
+				v-text-field(v-model="titleInputValue", 
+										label="Title*",
+										:rules="titleInputRules",
+										:disabled="inProgress")
+				v-slider(v-model="priorityInputValue", :thumb-size="25",
+								:min="1", :max="9", label="Priority", :disabled="inProgress")
+					template(#thumb-label)
+						span {{ priorityInputValue }}
+				v-textarea(label="Description",
+									v-model="descriptionInputValue",
+									:counter="true",
+									:max-length="150",
+									:rules="descriptionInputRules",
+									:disabled="inProgress")
+				v-radio-group(v-model="todoTimeMode",
+											:rules="todoTimeModePickerRules", 
+											row, :disabled="inProgress")
+					v-radio(color="primary", label="Once", :value="0")
+					v-radio(color="primary", label="Interval", :value="1")
+				v-layout(row)
+					v-flex(md5)
+						v-menu(:close-on-content-click="true")
+							template(#activator="{ on }")
+								v-text-field(v-model="datePickerValue", v-on="on",
+														readonly, prepend-icon="date_range",
+														:rules="dateInputRules",
+														:disabled="inProgress",
+														label="Select Date*")
+							v-date-picker(v-model="datePickerValue",
+														color="primary", no-title, scrollable)
+					v-flex.ml-1(md5)
+						v-menu(:close-on-content-click="false", ref="timePickerMenu")
+							template(#activator="{ on }")
+								v-text-field(v-model="timePickerValue", v-on="on",
+														readonly, prepend-icon="access_time",
+														:rules="timeInputRules",
+														:disabled="inProgress",
+														label="Select Time*")
+							v-time-picker(v-model="timePickerValue", 
+														color="primary", scrollable,
+														@click:minute="$refs.timePickerMenu.save(timePickerValue)")
+				.interval-settings(v-if="todoTimeMode === 1")
+					v-layout.ml-2(row)
+						v-text-field.interval-value-input(label="Every*",
+																							v-model="intervalNumberValue",
+																							:rules="intervalValueInputRules")
+						v-select.ml-2.interval-units-select(:items="intervalSelectItems",
+																								v-model="intervalSelectValue")
 </template>
 
 <script>
+	import { mapState, mapGetters } from "vuex";
+	import popupComponent from "./popup.vue";
+
 	export default {
 		data() {
 			return {
 				inProgress: false,
-				errorText: "",
 				titleInputValue: "",
 				priorityInputValue: 1,
 				descriptionInputValue: "",
-				timeMode: 0,
-				untilDatePickerValue: "",
-				untilTimePickerValue: ""
+				todoTimeMode: -1,
+				datePickerValue: "",
+				timePickerValue: "",
+				intervalNumberValue: "10",
+				titleInputRules: [
+					(val) => ( !!val && !!val.trim() ) ? ( val.length <= 30 || "Title should not be longer than 30 characters" ) : "Title is required"
+				],
+				descriptionInputRules: [
+					(val) => val ? (val.length <= 80 || "Description length should be less than or equal 160 characters") : true
+				],
+				todoTimeModePickerRules: [
+					(val) => val >= 0 || "Choose the mode"
+				],				
+				dateInputRules: [
+					(val) => !!val || "Date is required"
+				],
+				intervalValueInputRules: [
+					(val) => ( val.trim() && !isNaN(val) && val % 1 === 0 && val >= 1 && val <= 10000 ) || "Enter a positive integer not bigger than 10000"
+				],
+				intervalSelectItems: ["minutes", "hours", "days"],
+				intervalSelectValue: "hours"
 			};
 		},
 
 		methods: {
-			createTodo() {
+			resetForm() {
+				this.$refs.creatingTodoForm.resetValidation();
 
+				// set a default values
+				this.titleInputValue = "";
+				this.priorityInputValue = 1;
+				this.descriptionInputValue = "";
+				this.todoTimeMode = -1;
+				this.datePickerValue = "";
+				this.timePickerValue = "";
+				this.intervalNumberValue = "10";
+				this.intervalSelectValue = "hours";
+			},
+
+			createTodo() {
+				if ( this.$refs.creatingTodoForm.validate() ) {
+					let titleIndex = this.currentTodos.findIndex( (todoObj) => {
+						return todoObj.title === this.titleInputValue;
+					} );
+
+					if (titleIndex === -1) {
+						this.inProgress = true;
+
+						let docData = {
+							created: ( new Date() ).valueOf(),
+							title: this.titleInputValue,
+							priority: this.priorityInputValue,
+							description: this.descriptionInputValue,
+							time: ( new Date(`${this.datePickerValue} ${this.timePickerValue}`) ).valueOf()
+						};
+
+						if (this.todoTimeMode === 1) {
+							let everyNum = parseInt( this.intervalNumberValue );
+
+							switch (this.intervalSelectValue) {
+								case "minutes":
+									everyNum *= 1000 * 60;
+								break;
+								case "hours":
+									everyNum *= 1000 * 60 * 60;
+								break;
+								case "days":
+									everyNum *= 1000 * 60 * 60 * 24;
+								break;
+							};
+
+							docData.intervalSettings = {
+								doneTimes: 0,
+								every: everyNum,
+								everyUnits: this.intervalSelectValue,
+								lastFinished: docData.time
+							};
+						} else if (this.todoTimeMode === 0) {
+							docData.singleSettings = {
+								done: false,
+								doneTime: 0
+							};
+						}
+
+						this.currentTodosCollectionRef.doc(this.titleInputValue)
+							.set(docData)
+							.then( () => {
+								let newDoc = this.currentTodosCollectionRef.doc(docData.title);
+								
+								// add in current view list
+								this.$store.commit("addTodo", {
+									docRef: newDoc,
+									...docData
+								});
+
+								this.$store.dispatch("changeTodosCount", 1);
+
+								this.$refs.creatingTodoPopup.close();
+							} )
+							.catch( (err) => {
+								this.$refs.creatingTodoPopup.showMessage("error", err.code);
+							} )
+							.finally( () => {
+								this.inProgress = false;
+							} )
+					} else {
+						this.$refs.creatingTodoPopup.showMessage("error", "Task with this title is already exists in this folder");
+					}		
+				}
 			}
 		},
 
 		computed: {
-			visible: {
-				get() {
-					return this.$store.state.windows.creatingTodo;
-				},
+			...mapState({
+				currentFolderDocRef: (state) => state.folders.currentFolderDocRef,
+				currentFolderIndex: (state) => state.folders.currentFolderIndex,
+				currentTodos: (state) => state.folders.currentTodos
+			}),
 
-				set(value) {
-					this.$store.commit("setCreatingTodoPopup", !!value);
+			...mapGetters(["currentFolderObj", "currentTodosCollectionRef"]),
+
+			timeInputRules() {
+				let dpv = this.datePickerValue;
+
+				if (dpv) {
+					return [
+						(val) => val ? ( new Date(`${dpv} ${val}`) > +new Date() + 6e5 || "Selected date and time should be at least 10 minutes later than now" ) : "Time is required" 
+					];
+				} else {
+					return [
+						(val) => true
+					];
 				}
-			},
-
-			until() {
-				return this.timeMode === 0;
-			},
-			
-			interval() {
-				return this.timeMode === 1;
-			},
-
-			showError() {
-				return !!( this.errorText.trim() );
 			}
+		},
+
+		components: {
+			popupComponent
 		}
 	}
 </script>
 
 <style lang="scss">
+	.interval-value-input {
+		max-width: 100px;
+		margin-left: 20px;
+	}
 
+	.interval-units-select {
+		max-width: 100px;
+	}
 </style>
