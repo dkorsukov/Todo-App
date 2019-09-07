@@ -7,7 +7,6 @@
 </template>
 
 <script>
-	import api from "@api/index.js";
 	import toolbar from "@components/toolbar.vue";
 	import navigation from "@components/navigation.vue";
 	import mainSection from "@components/main.vue";
@@ -40,5 +39,7 @@
 
 
 <style lang="scss">
-
+	html, body {
+		min-width: 320px;
+	}
 </style>
