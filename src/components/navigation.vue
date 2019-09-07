@@ -7,7 +7,7 @@
 </template>
 
 <script>
-	import api from "@api/index.js";
+	import api from "@api";
 	import userSection from "./navigation/user.vue";
 	import folders from "./navigation/folders.vue";
 
