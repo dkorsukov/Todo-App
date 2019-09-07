@@ -1,4 +1,4 @@
-import api from "@api/index.js";
+import api from "@api";
 
 export default {
 	state: {
@@ -55,10 +55,12 @@ export default {
 					.then( (doc) => {
 						let data = doc.data();
 
-						dispatch("setUserData", {
-							name: data.name,
-							regTime: data.registered
-						});			
+						if (data.name !== undefined && data.registered !== undefined) {
+							dispatch("setUserData", {
+								name: data.name,
+								regTime: data.registered
+							});			
+						}	
 						
 						commit("setUserLoggedState", true);
 						commit("setUserSectionProgressBar", false);
