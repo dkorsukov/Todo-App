@@ -2,6 +2,10 @@
 	v-content
 		v-container.main-content__container(fluid, pa-4)
 			tooltip
+			v-progress-linear.main-section__progress(v-if="progressBar", 
+																							color="primary",
+																							:height="4" 
+																							indeterminate)
 			tools
 			todo-list
 			v-speed-dial.create-todo-btn(fixed, bottom, right, 
@@ -26,7 +30,8 @@
 
 		computed: {
 			...mapState({
-				isCurrentFolderLoaded: (state) => state.folders.isCurrentFolderLoaded
+				isCurrentFolderLoaded: (state) => state.folders.isCurrentFolderLoaded,
+				progressBar: (state) => state.bars.mainSection
 			})
 		},
 
@@ -39,6 +44,14 @@
 <style lang="scss">
 	.main {
 		width: 100%;
+
+		&-section__progress {
+			position: absolute;
+			width: 100%;
+			left: 0;
+			top: 0;
+			margin: 0!important;
+		}
 
 		&-content__container {
 			position: relative;
