@@ -8,7 +8,7 @@
 
 <script>
 	import { mapState } from "vuex";
-	import api from "@api/index.js";
+	import api from "@api";
 	import userAuth from "./user_section/auth.vue";
 	import userInfo from "./user_section/info.vue";
 

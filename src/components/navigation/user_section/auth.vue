@@ -8,17 +8,19 @@
 			v-form(ref="signInForm")
 				v-text-field(label="E-mail", 
 										v-model.trim="email", 
-										:rules="emailRules")
+										:rules="emailRules",
+										@keypress.enter="signIn")
 				v-text-field(label="Password", 
 										type="password", 
 										v-model="password", 
-										:rules="passwordRules")
+										:rules="passwordRules",
+										@keypress.enter="signIn")
 				v-btn(color="primary", block, @click="signIn") Sign In
-				v-btn(color="primary", flat, block) Forgot password?
+				v-btn(color="primary", flat, block, @click="openPasswordReset") Forgot password?
 </template>
 
 <script>
-	import api from "@api/index.js";
+	import api from "@api";
 
 	export default {
 		data() {
@@ -52,6 +54,10 @@
 							this.$store.commit("setUserSectionProgressBar", false);
 						} );
 				}
+			},
+
+			openPasswordReset() {
+				this.$store.commit("setResetPasswordPopup", true);
 			}
 		},
 
