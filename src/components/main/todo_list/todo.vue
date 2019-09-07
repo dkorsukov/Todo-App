@@ -27,11 +27,11 @@
 			title: String,
 			priority: Number,
 			time: Number,
-			singleSettings: {
+			single: {
 				type: Object,
 				required: false
 			},
-			intervalSettings: {
+			interval: {
 				type: Object,
 				required: false
 			}
@@ -51,13 +51,13 @@
 				let now = new Date();
 
 				if (this.withInterval) {
-					if (!this.intervalSettings.doneTimes) {
-						return now >= this.intervalSettings.lastFinished;
+					if (!this.interval.doneTimes) {
+						return now >= this.interval.lastFinished;
 					} else {
-						return now >= this.intervalSettings.lastFinished + this.intervalSettings.every;
+						return now >= this.interval.lastFinished + this.interval.every;
 					}
 				} else {
-					return now >= this.time && !this.singleSettings.done;
+					return now >= this.time && !this.single.done;
 				}
 			},
 
@@ -65,7 +65,7 @@
 				let text = [];
 
 				if (this.withInterval) {
-					text.push(`Every ${this.everyInUnits} ${this.intervalSettings.everyUnits.replace("s", "(s)")}`);
+					text.push(`Every ${this.everyInUnits} ${this.interval.everyUnits.replace("s", "(-s)")}`);
 				} else {
 					text.push(`Scheduled for ${new Date(this.time).toLocaleString()}`)
 				}
@@ -82,23 +82,24 @@
 
 				// main info for interval mode
 				if (this.withInterval) {
-					text.push(`Done ${this.intervalSettings.doneTimes} time(s)`);
+					let lastFinishedDate = new Date(this.interval.lastFinished).toLocaleString();
 
-					if (this.intervalSettings.doneTimes) {
-						text.push(`Last finished at ${new Date(this.intervalSettings.lastFinished).toLocaleString()}`);
+					if (this.interval.doneTimes) {
+						text.push(`Already done ${this.interval.doneTimes} time(-s)`);
+						text.push(`Prev completion: ${lastFinishedDate}`);
 					}
 
 					if (this.allowToComplete) {
 						text.push(`Complete the task`);
 					} else {
-						let nextTimeDate = new Date(this.intervalSettings.lastFinished + this.intervalSettings.every);
+						let nextTimeDate = new Date(this.interval.lastFinished + this.interval.every).toLocaleString();
 
-						text.push(`Next time at ${nextTimeDate.toLocaleString()}`);
+						text.push(`Next time at ${nextTimeDate}`);
 					}
 				} else {
 					// and for single mode
-				  if (this.singleSettings.done) {
-				  	text.push(`Completed at ${new Date(this.singleSettings.doneTime).toLocaleString()}`);
+				  if (this.single.done) {
+				  	text.push(`Completed at ${new Date(this.single.doneTime).toLocaleString()}`);
 				  } else {
 				  	text.push("Complete the task");
 					}
@@ -122,16 +123,16 @@
 
 				if (this.withInterval) {
 					newData = {
-						intervalSettings: {
-							doneTimes: this.intervalSettings.doneTimes + 1,
-							every: this.intervalSettings.every,
-							everyUnits: this.intervalSettings.everyUnits,
+						interval: {
+							doneTimes: this.interval.doneTimes + 1,
+							every: this.interval.every,
+							everyUnits: this.interval.everyUnits,
 							lastFinished: ( new Date() ).valueOf()
 						}
 					};
 				} else {
 					newData = {
-						singleSettings: {
+						single: {
 							done: true,
 							doneTime: ( new Date() ).valueOf()
 						}
@@ -194,7 +195,7 @@
 			},
 
 			withInterval() {
-				return this.intervalSettings !== undefined;
+				return this.interval !== undefined;
 			},
 
 			priorityColor() {
@@ -209,9 +210,9 @@
 			
 			everyInUnits() {
 				if (this.withInterval) {
-					let result = this.intervalSettings.every;
+					let result = this.interval.every;
 
-					switch (this.intervalSettings.everyUnits) {
+					switch (this.interval.everyUnits) {
 						case "minutes":
 							result /= 1000 * 60
 						break;
@@ -237,7 +238,7 @@
 		mounted() {
 			this.update();
 
-			if (this.withInterval || !this.singleSettings.done) {
+			if (this.withInterval || !this.single.done) {
 				this.updateInterval = setInterval( () => {
 					this.update();
 				}, 1000 );

@@ -6,8 +6,8 @@
 							:title="todo.title",
 							:priority="todo.priority",
 							:time="todo.time",
-							:singleSettings="todo.singleSettings",							
-							:intervalSettings="todo.intervalSettings") {{ todo.description }}
+							:single="todo.single",							
+							:interval="todo.interval") {{ todo.description }}
 </template>
 
 <script>

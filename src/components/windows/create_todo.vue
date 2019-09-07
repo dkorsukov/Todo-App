@@ -141,14 +141,14 @@
 								break;
 							};
 
-							docData.intervalSettings = {
+							docData.interval = {
 								doneTimes: 0,
 								every: everyNum,
 								everyUnits: this.intervalSelectValue,
 								lastFinished: docData.time
 							};
 						} else if (this.todoTimeMode === 0) {
-							docData.singleSettings = {
+							docData.single = {
 								done: false,
 								doneTime: 0
 							};
