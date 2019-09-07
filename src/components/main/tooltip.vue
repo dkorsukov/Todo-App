@@ -16,16 +16,27 @@
 		computed: {
 			...mapState({
 				isFoldersLoaded: (state) => state.folders.isFoldersLoaded,
+				folders: (state) => state.folders.list,
 				currentFolderIndex: (state) => state.folders.currentFolderIndex,
-				currentTodos: (state) => state.folders.currentTodos
+				currentTodos: (state) => state.folders.currentTodos,
+				isCurrentFolderLoaded: (state) => state.folders.isCurrentFolderLoaded,
+				isUserLogged: (state) => state.user.isLogged
  			}),
 
 			tooltipText() {
+				if (!this.isUserLogged) {
+					return "Sign in";
+				}
+
 				if (this.isFoldersLoaded) {
-					if (this.currentFolderIndex === null) {
+					if (!this.folders.length) {
+						return "Create folder";
+					} else if (this.currentFolderIndex === null) {
 						return "Select folder";
-					} else if (this.currentTodos.length === 0) {
+					} else if (this.currentTodos.length === 0 && this.isCurrentFolderLoaded) {
 						return "Create task";
+					} else {
+						return "";
 					}
 				} else {
 					return "";
