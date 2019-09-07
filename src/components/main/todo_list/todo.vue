@@ -108,7 +108,10 @@
 			},
 
 			update() {
+				/**	@type {boolean} */
 				this.allowToComplete = this.getAllowToComplete();
+
+				/** @type {string[]} */
 				this.timeInfoText = this.getTimeInfoText();
 			},
 
