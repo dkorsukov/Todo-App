@@ -1,7 +1,8 @@
 export default {
 	state: {
 		userSection: true,
-		foldersListSection: false
+		foldersListSection: false,
+		mainSection: false
 	},
 
 	mutations: {
@@ -11,6 +12,10 @@ export default {
 		
 		setFoldersListSectionProgressBar(state, value) {
 			state.foldersListSection = value;
+		},
+
+		setMainSectionProgressBar(state, value) {
+			state.mainSection = value;
 		}
 	}
 };
