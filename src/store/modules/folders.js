@@ -16,29 +16,23 @@ export default {
 			type: "created",
 			func: (itemA, itemB) => itemA.created > itemB.created ? -1 : 1 
 		}, {
+			type: "time",
+			func: (itemA, itemB) => itemA.time < itemB.time ? -1 : 1
+		}, {
 			type: "priority",
 			func: (itemA, itemB) => itemA.priority > itemB.priority ? -1 : 1
 		}],
-		isCurrentFolderLoaded: true,
-		currentTodos: [{
-			priority: 5,
-			title: "TITLE",
-			description: "DESCRIPTION",
-			created: +(new Date())
-		}, {
-			priority: 9,
-			title: "ABC",
-			description: "HELLO",
-			created: +(new Date()) - 1000
-		}, {
-			priority: 7,
-			title: "DDD",
-			description: "123123",
-			created: +(new Date()) + 1000
-		}]	
+		isCurrentFolderLoaded: false,
+		currentTodos: [],
+		todosCollectionUnsubscribe: null,
+		todosCache: {}
 	},
 
 	getters: {
+		currentFolderObj(state) {
+			return state.list[state.currentFolderIndex];
+		},
+
 		sortedTodos(state) {
 			let currentOrderObj = state.orderTypes.find( (typeObj) => typeObj.type === state.todosOrder ),
 					unsorted = [...state.currentTodos];
@@ -48,6 +42,10 @@ export default {
 			} else {
 				return unsorted;
 			}
+		},
+
+		currentFolderName(state) {
+			return state.currentFolderDocRef.id;
 		},
 
 		currentTodosCollectionRef(state) {
@@ -62,6 +60,11 @@ export default {
 	
 		setFoldersList(state, list) {
 			state.list = list;
+
+			// add empty list for each folder (cache)
+			list.forEach( (folderObj) => {
+				state.todosCache[folderObj.name] = [];
+			} );
 		},
 
 		addFolder(state, { name, docRef, created, todosCount }) {
@@ -73,9 +76,14 @@ export default {
 				created: createdDate,
 				todosCount 
 			});
+
+			state.todosCache[name] = [];
 		},
 	
 		deleteFolder(state, folderIndex) {
+			// remove folder cache
+			delete state.todosCache[ state.list[folderIndex].docRef.id ];
+
 			state.list.splice(folderIndex, 1);
 		},
 	
@@ -95,6 +103,10 @@ export default {
 			state.list[folderIndex].created = new Date(value);
 		},
 	
+		setFolderCache(state, { folderName, value }) {
+			state.todosCache[folderName] = value;
+		},
+
 		setFolderTodosCount(state, { folderIndex, value }) {
 			state.list[folderIndex].todosCount = value;
 		},
@@ -109,9 +121,44 @@ export default {
 			state.currentTodos = list;
 		},
 
+		addTodo(state, todoObj) {
+			// add to current view list
+			state.currentTodos.push(todoObj);
+
+			// add to cache
+			state.todosCache[state.currentFolderDocRef.id].push(todoObj);
+		},
+
+		removeTodo(state, todoIndex) {
+			// remove from current view list
+			state.currentTodos.splice(todoIndex, 1);
+
+			// remove from cache
+			state.todosCache[state.currentFolderDocRef.id].splice(todoIndex, 1);
+
+			// change todosCount field in folder object
+		},
+
+		editTodo(state, { todoIndex, newData }) {
+			let forEdit = state.currentTodos[todoIndex],
+					newObj = {
+						...forEdit,
+						...newData
+					};
+
+			// use splice to say Vue.js update getter
+			state.currentTodos.splice(todoIndex, 1, newObj);
+
+			state.todosCache[state.currentFolderDocRef.id][todoIndex] = newObj;
+		},
+
 		// loading state of todos in currentFolder
 		setCurrentFolderLoadedState(state, value) {
 			state.isCurrentFolderLoaded = value;
+		},
+
+		setTodosCollectionListenerUnsubscribe(state, func) {
+			state.todosCollectionUnsubscribe = func;
 		}
 	},
 
@@ -122,7 +169,7 @@ export default {
 			let foldersCollectionRef = rootState.user.docRef.collection("folders");
 			commit("setFoldersCollectionRef", foldersCollectionRef);
 
-			dispatch("setDatabaseListener");
+			dispatch("setFoldersCollectionListener");
 	
 			foldersCollectionRef.get()
 				.then( (collection) => {
@@ -134,7 +181,7 @@ export default {
 							todosCount: null
 						};
 					} );
-	
+
 					commit("setFoldersList", foldersArray);
 	
 					commit("setFoldersLoadedState", true);
@@ -142,7 +189,16 @@ export default {
 				} );
 		},
 	
-		setDatabaseListener({ state, commit, dispatch }) {
+		changeTodosCount({ state, commit, getters }, value) {
+			if (getters.currentFolderObj.todosCount !== null) {
+				commit("setFolderTodosCount", {
+					folderIndex: state.currentFolderIndex,
+					value: getters.currentFolderObj.todosCount + value 
+				});
+			}	
+		},
+
+		setFoldersCollectionListener({ state, commit, dispatch }) {
 			state.foldersCollectionRef.onSnapshot( (snapshot) => {
 				let fromServer = !snapshot.metadata.hasPendingWrites;
 
@@ -156,6 +212,7 @@ export default {
 
 								commit("deleteFolder", removedIndex);
 
+								// if removed folder was selected
 								if (state.currentFolderIndex === removedIndex) {
 									dispatch("resetCurrentFolder");
 								}
@@ -172,22 +229,139 @@ export default {
 			} );
 		},
 
+		setTodosCollectionListener({ state, commit, dispatch, getters }) {
+			let unsubscribe = getters.currentTodosCollectionRef
+				.onSnapshot( (snapshot) => {
+					let fromServer = !snapshot.metadata.hasPendingWrites;
+
+					if (fromServer) {
+						dispatch("resetCurrentFolderInfo");
+
+						snapshot.docChanges()
+							.forEach( (change) => {
+								switch (change.type) {
+									case "removed":
+										let changedDocObjIndex = state.currentTodos.findIndex( (todoObj) => {
+											return todoObj.title === change.doc.ref.id;
+										} );
+
+										commit("removeTodo", changedDocObjIndex);
+									break;
+
+									case "modified":
+										change.doc.ref.get()
+											.then( (doc) => {
+												let data = doc.data();
+
+												let editedIndex = state.currentTodos.findIndex( (todoObj) => {
+													return todoObj.title === data.title;
+												} );
+
+												commit("editTodo", {
+													todoIndex: editedIndex,
+													newData: data
+												});
+											} );
+									break;
+
+									case "added":
+										let folderInCache = state.todosCache[getters.currentFolderName];
+
+										let searchInSaved = folderInCache.find( (todoObj) => {
+											return change.doc.ref.id === todoObj.title;
+										} );
+
+										// If not found in current folder cache
+										if (searchInSaved === undefined) {
+											commit("setMainSectionProgressBar", true);
+											commit("setCurrentFolderLoadedState", false);
+
+											change.doc.ref.get()
+												.then( (doc) => {
+													let data = doc.data();
+
+													commit("addTodo", {
+														docRef: change.doc.ref,
+														...data
+													});
+												} )
+												.finally( () => {
+													commit("setMainSectionProgressBar", false);
+													commit("setCurrentFolderLoadedState", true);
+												} );
+										}
+									break;
+								}
+							} );
+					}
+				} );
+
+			commit("setTodosCollectionListenerUnsubscribe", unsubscribe);
+		},
+
+		unsetTodosCollectionListener({ state }) {
+			if (state.todosCollectionUnsubscribe !== null) {
+				state.todosCollectionUnsubscribe();
+			}
+		},
+
+		resetCurrentFolderInfo({ state, commit }) {
+			commit("setFolderTodosCount", {
+				folderIndex: state.currentFolderIndex,
+				value: null
+			});			
+		},
+
+		getFolderInfo({ state, commit }, folderIndex) {
+			let requiredObj = state.list[folderIndex];
+
+			if (requiredObj.created === null) {
+				requiredObj.docRef.get()
+					.then( (doc) => {
+						let data = doc.data();
+
+						commit("setFolderCreated", {
+							folderIndex,
+							value: data.created
+						});
+					} );
+			}
+
+			requiredObj.docRef.collection("todos").get()
+				.then( (collection) => {
+					commit("setFolderTodosCount", {
+						folderIndex,
+						value: collection.docs.length
+					});
+				} );
+		},
+
 		resetCurrentFolder({ commit }) {
 			commit("setCurrentFolderIndex", null);
-			commit("setCurrentFolderDocRef", null);		
+			commit("setCurrentFolderDocRef", null);
+			commit("setCurrentTodos", []);
+			commit("setCurrentFolderLoadedState", false);
 		},
-	
-		switchCurrentFolder({ state, commit }, folderIndex) {
-			commit("setCurrentFolderIndex", folderIndex);
+
+		switchCurrentFolder({ state, commit, dispatch }, newFolderIndex) {
+			dispatch("resetCurrentFolder");
+
+			commit("setCurrentFolderIndex", newFolderIndex);
 			
-			let currentFolderDocRef = state.list[folderIndex].docRef;
-			commit("setCurrentFolderDocRef", currentFolderDocRef);
-	
-			let folderTodosCollectionRef = currentFolderDocRef.collection("todos");
-			/*folderTodosCollectionRef.get()
-				.then( (collection) => {
-					// ...
-				} );*/
+			let newFolderDocRef = state.list[newFolderIndex].docRef;
+			commit("setCurrentFolderDocRef", newFolderDocRef);
+
+			dispatch("unsetTodosCollectionListener");
+
+			// Set saved from cache
+			if (newFolderDocRef.id in state.todosCache) {
+				let fromCache = state.todosCache[newFolderDocRef.id].slice();
+				commit("setCurrentTodos", fromCache);
+
+				commit("setCurrentFolderLoadedState", true);
+			};
+
+			dispatch("setTodosCollectionListener");
 		}
 	}
 };
