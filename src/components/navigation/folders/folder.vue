@@ -27,9 +27,12 @@
 						color="rgba(0, 0, 0, 0.54)",
 						@click="showRemoveMenu = true")
 				v-icon delete
-		.remove-menu-container(v-if="showRemoveMenu")
-			v-btn(color="primary", flat, small, @click="showRemoveMenu = false") Cancel
-			v-btn(color="primary", small, @click="removeFolder") Delete
+		v-tooltip(bottom, v-model="showRemoveError")
+			template(#activator="{ on }")
+				.remove-menu-container(v-if="showRemoveMenu")
+					v-btn(color="primary", flat, small, @click="showRemoveMenu = false") Cancel
+					v-btn(color="primary", small, @click="removeFolder") Delete
+			span Folder should be empty		
 </template>
 
 <script>
@@ -45,7 +48,8 @@
 			return {
 				inProgress: false,
 				showRemoveMenu: false,
-				showInfo: false
+				showInfo: false,
+				showRemoveError: false
 			};
 		},
 
@@ -60,15 +64,33 @@
 
 			removeFolder() {
 				this.inProgress = true;
-				this.showRemoveMenu = false;
 
-				this.folders[this.index].docRef.delete()
-					.then( () => {
-						// process removal from list in database listener (folders.js)
+				// if there are no items then remove folder
+				this.folders[this.index].docRef.collection("todos").get()
+					.then( (collection) => {
+						if (!collection.docs.length) {
+							this.folders[this.index].docRef.delete()
+								.then( () => {
+									/* 	
+											process of removal from view list 
+											you can find in file called folders.js
+									*/
+								} )
+								.finally( () => {
+									this.inProgress = false;
+								} )
+						} else {
+							this.showRemoveError = true;
+
+							setTimeout( () => {
+								this.showRemoveError = false;
+								this.showRemoveMenu = false;
+							}, 1500 );
+						}
 					} )
 					.finally( () => {
 						this.inProgress = false;
-					} )
+					} );	
 			},
 
 			getInfo() {
@@ -78,18 +100,7 @@
 					return true;
 				}
 
-				this.folders[this.index].docRef.get()
-					.then( (folder) => {
-						let folderData = folder.data();
-						this.$store.commit("setFolderCreated", {
-							folderIndex: this.index,
-							value: folderData.created
-						});
-						this.$store.commit("setFolderTodosCount", {
-							folderIndex: this.index,
-							value: folderData.todosCount
-						});
-					} );
+				this.$store.dispatch("getFolderInfo", this.index);
 			}
 		},
 
