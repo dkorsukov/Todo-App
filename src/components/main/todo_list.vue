@@ -2,8 +2,12 @@
 	v-layout.mt-2(row, wrap)
 		todo-item(v-for="(todo, index) in todos",
 							:key="index",
+							:created="todo.created",
+							:title="todo.title",
 							:priority="todo.priority",
-							:title="todo.title") {{ todo.description }}
+							:time="todo.time",
+							:singleSettings="todo.singleSettings",							
+							:intervalSettings="todo.intervalSettings") {{ todo.description }}
 </template>
 
 <script>
