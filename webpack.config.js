@@ -32,7 +32,7 @@ module.exports = {
     extensions: [".js", ".vue", ".json"],
     alias: {
 			"@components": path.resolve(__dirname, "src/components"),
-			"@api": path.resolve(__dirname, "src/api")
+			"@api": path.resolve(__dirname, "src/api/index.js")
     }
   },
 
