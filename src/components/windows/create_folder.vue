@@ -2,7 +2,7 @@
 	popup-component(name="creatingFolder",
 									ref="creatingFolderPopup",
 									:inProgress="inProgress",
-									@close="$refs.creatingFolderForm.reset()",
+									@close="resetForm",
 									@confirm="createFolder")
 		template(#title)
 			v-icon.offset-left(medium) add
@@ -26,12 +26,21 @@
 				inProgress: false,
 				folderName: "",				
 				folderNameRules: [
-					(val) => val ? (val.length < 14 || "Folder name length should be less than 14 characters") : "Folder name is required"
+					(val) => val.length > 0 || "Folder name is required",
+					(val) => val.length < 14 || "Folder name length should be less than 14 characters",
+					(val) => !val.includes("/") || "Folder name should not contain forbidden characters (/)"
 				]				
 			};
 		},
 
 		methods: {
+			resetForm() {
+				this.$refs.creatingFolderForm.resetValidation();
+
+				// set default values
+				this.folderName = "";
+			},
+
 			createFolder() {
 				if ( ~this.folders.findIndex( (f) => f.name === this.folderName ) ) {
 					this.$refs.creatingFolderPopup.showMessage("error", "Folder with this name is already exists");

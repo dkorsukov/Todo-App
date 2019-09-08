@@ -75,10 +75,12 @@
 				timePickerValue: "",
 				intervalNumberValue: "10",
 				titleInputRules: [
-					(val) => ( !!val && !!val.trim() ) ? ( val.length <= 30 || "Title should not be longer than 30 characters" ) : "Title is required"
+					(val) => val.length > 0 || "Title is required",
+					(val) => val.length <= 30 || "Title should not be longer than 30 characters",
+					(val) => !val.includes("/") || "Title should not contain forbidden characters (/)"
 				],
 				descriptionInputRules: [
-					(val) => val ? (val.length <= 80 || "Description length should be less than or equal 160 characters") : true
+					(val) => val.length <= 80 || "Description length should be less than or equal 80 characters"
 				],
 				todoTimeModePickerRules: [
 					(val) => val >= 0 || "Choose the mode"
@@ -87,7 +89,7 @@
 					(val) => !!val || "Date is required"
 				],
 				intervalValueInputRules: [
-					(val) => ( val.trim() && !isNaN(val) && val % 1 === 0 && val >= 1 && val <= 10000 ) || "Enter a positive integer not bigger than 10000"
+					(val) => ( !isNaN(val) && val % 1 === 0 && val > 0 && val <= 10000 ) || "Enter a positive integer not bigger than 10000"
 				],
 				intervalSelectItems: ["minutes", "hours", "days"],
 				intervalSelectValue: "hours"
