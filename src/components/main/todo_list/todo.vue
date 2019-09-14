@@ -281,6 +281,10 @@
 			font-size: 14px;
 			color: rgba(0, 0, 0, 0.7);
 
+			.theme--dark & {
+				color: rgba(255, 255, 255, 0.7);
+			}
+
 			& > p {
 				margin-bottom: 4px;
 			}

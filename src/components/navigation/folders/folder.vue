@@ -15,14 +15,14 @@
 					span Created {{ created.toLocaleString() }}
 					br
 					span Contains {{ todosCount }} todo
-				v-progress-circular(indeterminate,
-														v-else, 
-														:size="18",
-														:width="2",
-														color="rgba(190, 190, 190, 0.75)")
+				.folder-elem__info-progress-container(v-else)
+					v-progress-circular(indeterminate,
+															:size="18",
+															:width="2",
+															color="rgba(190, 190, 190, 0.75)")
 		v-list-tile-action.tile-action
 			v-btn(icon, 
-						ripple, 
+						ripple,
 						flat, 
 						color="rgba(0, 0, 0, 0.54)",
 						@click="showRemoveMenu = true")
@@ -138,6 +138,12 @@
 			background: rgba(0, 0, 0, 0.12);
 		}
 
+		&__info-progress-container {
+			width: 180px;
+			display: flex;
+			justify-content: center;
+		}
+
 		&:hover {
 			background-color: rgba(0, 0, 0, 0.14);
 		}
@@ -157,5 +163,9 @@
 		width: 100%;
 		height: 100%;
 		background-color: rgba(220, 220, 220, 0.95);
+
+		.theme--dark & {
+			background-color: rgba(140, 140, 140, 0.95);
+		}
 	}
 </style>

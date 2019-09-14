@@ -1,5 +1,5 @@
 <template lang="pug">
-	v-layout(column, justify-center)
+	v-layout.pa-3(column, justify-center)
 		v-flex(md12, align-self-end)
 			v-btn(color="primary", small, @click="$store.commit('setCreatingAccountPopup', true)") Sign Up
 		v-flex(md12)

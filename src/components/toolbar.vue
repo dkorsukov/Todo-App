@@ -1,5 +1,5 @@
 <template lang="pug">
-	v-toolbar.pa-1(color="primary")
+	v-toolbar.pa-1.app-mobile-toolbar(color="primary")
 		v-btn(icon, flat, large, color="white",
 					@click="showNavigation")
 			v-icon(medium, color="white") menu

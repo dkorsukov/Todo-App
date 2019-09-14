@@ -4,6 +4,7 @@
 		reset-password
 		create-folder
 		create-todo
+		app-settings
 </template>
 
 <script>
@@ -11,13 +12,15 @@
 	import resetPassword from "./windows/reset_password.vue";
 	import createFolder from "./windows/create_folder.vue";
 	import createTodo from "./windows/create_todo.vue";
+	import appSettings from "./windows/app_settings.vue";
 
 	export default {
 		components: {
 			createAccount,
 			resetPassword,
 			createFolder,
-			createTodo
+			createTodo,
+			appSettings
 		}
 	}
 </script>

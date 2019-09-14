@@ -6,7 +6,10 @@
 																							color="primary",
 																							:height="4" 
 																							indeterminate)
-			tools(v-if="showMainSectionTools")
+			.app-settings-btn-wrapper
+				v-btn.app-settings-btn(icon, large, @click="openAppSettings")
+					v-icon.app-settings-btn__icon settings_application
+			tools
 			todo-list
 			v-speed-dial.create-todo-btn(fixed, bottom, right, 
 																	v-if="isCurrentFolderLoaded")
@@ -28,16 +31,18 @@
 			};
 		},
 
+		methods: {
+			openAppSettings() {
+				this.$store.commit("setAppSettingsPopup", true);
+			}
+		},
+
 		computed: {
 			...mapState({
 				isCurrentFolderLoaded: (state) => state.folders.isCurrentFolderLoaded,
 				currentFolderIndex: (state) => state.folders.currentFolderIndex,
 				progressBar: (state) => state.bars.mainSection
-			}),
-
-			showMainSectionTools() {
-				return this.currentFolderIndex !== null;
-			}
+			})
 		},
 
 		components: {
@@ -72,6 +77,19 @@
 
 	.normal-size {
 		font-size: 16px;
+	}
+
+	.app-settings-btn {
+		&-wrapper {
+			overflow: hidden;
+			position: absolute;
+			top: 10px;
+			right: 10px;
+		}
+
+		&__icon {
+			max-width: 24px;
+		}
 	}
 
 	.create-todo-btn {

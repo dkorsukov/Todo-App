@@ -1,7 +1,7 @@
 <template lang="pug">
-	v-container.pa-3.relative(fluid)
+	v-container.pa-0.relative.user-section(fluid)
 		.progress-container(v-if="sectionProgressBar")
-			v-progress-circular(indeterminate, :size="30", color="#757596")
+			v-progress-circular.user-section-progress(indeterminate, :size="30")
 		user-auth(v-if="!isLogged")
 		user-info(v-if="isLogged")
 </template>
@@ -43,6 +43,14 @@
 </script>
 
 <style lang="scss">
+	.user-section-progress {
+		color: rgb(117, 117, 150);
+
+		.theme--dark & {
+			color: rgb(182, 182, 182);
+		}
+	}
+
 	.relative {
 		position: relative;
 	}

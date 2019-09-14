@@ -76,8 +76,7 @@
 				intervalNumberValue: "10",
 				titleInputRules: [
 					(val) => val.length > 0 || "Title is required",
-					(val) => val.length <= 30 || "Title should not be longer than 30 characters",
-					(val) => !val.includes("/") || "Title should not contain forbidden characters (/)"
+					(val) => val.length <= 30 || "Title should not be longer than 30 characters"
 				],
 				descriptionInputRules: [
 					(val) => val.length <= 80 || "Description length should be less than or equal 80 characters"
@@ -156,7 +155,10 @@
 							};
 						}
 
-						this.currentTodosCollectionRef.doc(this.titleInputValue)
+						// encode for safety usage of some chars (/, $, #, etc)
+						let	encodedTitle = encodeURIComponent(this.titleInputValue);
+
+						this.currentTodosCollectionRef.doc(encodedTitle)
 							.set(docData)
 							.then( () => {
 								let newDoc = this.currentTodosCollectionRef.doc(docData.title);

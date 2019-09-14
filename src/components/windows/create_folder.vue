@@ -27,8 +27,7 @@
 				folderName: "",				
 				folderNameRules: [
 					(val) => val.length > 0 || "Folder name is required",
-					(val) => val.length < 14 || "Folder name length should be less than 14 characters",
-					(val) => !val.includes("/") || "Folder name should not contain forbidden characters (/)"
+					(val) => val.length < 14 || "Folder name length should be less than 14 characters"
 				]				
 			};
 		},
@@ -53,17 +52,18 @@
 				if ( this.$refs.creatingFolderForm.validate() ) {
 					this.inProgress = true;
 
-					let now = ( new Date() ).valueOf();
+					let now = ( new Date() ).valueOf(),
+							// encode for safety usage of some chars (/, $, #, etc)
+							encodedName = encodeURIComponent(this.folderName);
 
-					this.foldersCollectionRef.doc(this.folderName).set({
-						created: now,
-						todosCount: 0
+					this.foldersCollectionRef.doc(encodedName).set({
+						created: now
 					})
 						.then( () => {
 							// add in view list
 							this.$store.commit("addFolder", {
 								name: this.folderName,
-								docRef: this.foldersCollectionRef.doc(this.folderName),
+								docRef: this.foldersCollectionRef.doc(encodedName),
 								created: now,
 								todosCount: 0
 							});

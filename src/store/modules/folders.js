@@ -45,11 +45,19 @@ export default {
 		},
 
 		currentFolderName(state) {
-			return state.currentFolderDocRef.id;
+			if (state.currentFolderIndex !== null) {
+				return state.list[state.currentFolderIndex].name;
+			} else {
+				return null;
+			}	
 		},
 
 		currentTodosCollectionRef(state) {
-			return state.currentFolderDocRef.collection("todos");
+			if (state.currentFolderDocRef !== null) {
+				return state.currentFolderDocRef.collection("todos");
+			} else {
+				return null;
+			}	
 		}
 	},
 
@@ -78,6 +86,7 @@ export default {
 			});
 
 			state.todosCache[name] = [];
+			console.log(state.todosCache);
 		},
 	
 		deleteFolder(state, folderIndex) {
@@ -126,7 +135,8 @@ export default {
 			state.currentTodos.push(todoObj);
 
 			// add to cache
-			state.todosCache[state.currentFolderDocRef.id].push(todoObj);
+			let currentFolderName = state.list[state.currentFolderIndex].name;			
+			state.todosCache[currentFolderName].push(todoObj);
 		},
 
 		removeTodo(state, todoIndex) {
@@ -134,9 +144,8 @@ export default {
 			state.currentTodos.splice(todoIndex, 1);
 
 			// remove from cache
-			state.todosCache[state.currentFolderDocRef.id].splice(todoIndex, 1);
-
-			// change todosCount field in folder object
+			let currentFolderName = state.list[state.currentFolderIndex].name;			
+			state.todosCache[currentFolderName].splice(todoIndex, 1);
 		},
 
 		editTodo(state, { todoIndex, newData }) {
@@ -149,7 +158,8 @@ export default {
 			// use splice to say Vue.js update getter
 			state.currentTodos.splice(todoIndex, 1, newObj);
 
-			state.todosCache[state.currentFolderDocRef.id][todoIndex] = newObj;
+			let currentFolderName = state.list[state.currentFolderIndex].name;
+			state.todosCache[currentFolderName][todoIndex] = newObj;
 		},
 
 		// loading state of todos in currentFolder
@@ -175,7 +185,7 @@ export default {
 				.then( (collection) => {
 					let foldersArray = collection.docs.map( (doc) => {
 						return {
-							name: doc.ref.id,
+							name: decodeURIComponent(doc.ref.id),
 							docRef: doc.ref,
 							created: null,
 							todosCount: null
@@ -207,7 +217,7 @@ export default {
 						.forEach( (change) => {
 							if (change.type === "removed") {
 								let removedIndex = state.list.findIndex( (folderObj) => {
-									return folderObj.name === change.doc.id;
+									return folderObj.name === decodeURIComponent(change.doc.ref.id);
 								} );
 
 								commit("deleteFolder", removedIndex);
@@ -218,7 +228,7 @@ export default {
 								}
 							} else if (change.type === "added" && state.isFoldersLoaded) {
 								commit("addFolder", {
-									name: change.doc.ref.id,
+									name: decodeURIComponent(change.doc.ref.id),
 									docRef: change.doc.ref,
 									created: null,
 									todosCount: null
@@ -242,7 +252,7 @@ export default {
 								switch (change.type) {
 									case "removed":
 										let changedDocObjIndex = state.currentTodos.findIndex( (todoObj) => {
-											return todoObj.title === change.doc.ref.id;
+											return todoObj.title === decodeURIComponent(change.doc.ref.id);
 										} );
 
 										commit("removeTodo", changedDocObjIndex);
@@ -252,6 +262,7 @@ export default {
 										change.doc.ref.get()
 											.then( (doc) => {
 												let data = doc.data();
+												data.title = decodeURIComponent(data.title);
 
 												let editedIndex = state.currentTodos.findIndex( (todoObj) => {
 													return todoObj.title === data.title;
@@ -268,7 +279,7 @@ export default {
 										let folderInCache = state.todosCache[getters.currentFolderName];
 
 										let searchInSaved = folderInCache.find( (todoObj) => {
-											return change.doc.ref.id === todoObj.title;
+											return todoObj.title === decodeURIComponent(change.doc.ref.id);
 										} );
 
 										// If not found in current folder cache
@@ -279,6 +290,7 @@ export default {
 											change.doc.ref.get()
 												.then( (doc) => {
 													let data = doc.data();
+													data.title = decodeURIComponent(data.title);
 
 													commit("addTodo", {
 														docRef: change.doc.ref,
@@ -353,9 +365,11 @@ export default {
 
 			dispatch("unsetTodosCollectionListener");
 
+			let decodedDocRefId = decodeURIComponent(newFolderDocRef.id);
+
 			// Set saved from cache
-			if (newFolderDocRef.id in state.todosCache) {
-				let fromCache = state.todosCache[newFolderDocRef.id].slice();
+			if (decodedDocRefId in state.todosCache) {
+				let fromCache = state.todosCache[decodedDocRefId].slice();
 				commit("setCurrentTodos", fromCache);
 
 				commit("setCurrentFolderLoadedState", true);

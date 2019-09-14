@@ -1,5 +1,5 @@
 <template lang="pug">
-	v-app
+	v-app(:dark="darkTheme")
 		navigation(:temporary="mobile")
 		toolbar(v-if="mobile")
 		main-section
@@ -20,12 +20,23 @@
 		},
 
 		computed: {
+			darkTheme() {
+				return this.$store.state.darkTheme;
+			},
+
 			mobile() {
 				return this.vw < this.$store.state.mobileBreakPoint;
 			}
 		},
 
 		mounted() {
+			// get theme from local storage
+			let themeFromLocal = JSON.parse( localStorage.getItem("todo-app/user-data/dark-theme") );
+
+			if (typeof themeFromLocal === "boolean") {
+				this.$store.commit("setDarkTheme", themeFromLocal);
+			}
+
 			window.addEventListener("resize", () => {
 				this.vw = window.innerWidth;
 			});

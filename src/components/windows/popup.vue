@@ -1,5 +1,5 @@
 <template lang="pug">
-	v-dialog(v-model="visible", :persistent="true", :maxWidth="700")
+	v-dialog(v-model="visible", :persistent="true", :maxWidth="width")
 		v-card
 			v-card-title
 				slot(name="title")
@@ -8,11 +8,11 @@
 			v-container(fluid, pa-1, grid-list-md)
 				v-card-text
 					v-layout(row, justify-center, align-center)
-						v-flex(md11)
+						v-flex(:class="`md${contentCols}`")
 							slot(name="content")
 					v-layout(row, justify-end)
 						v-btn(flat, :disabled="inProgress", @click="close") Close
-						v-btn(color="primary", :disabled="inProgress", :loading="inProgress", @click="$emit('confirm')") Confirm	
+						v-btn(color="primary", :disabled="inProgress", :loading="inProgress", @click="$emit('confirm')", v-if="confirmBtn") Confirm	
 </template>
 
 <script>
@@ -20,7 +20,22 @@
 		// in progress - state for disable buttons and forms
 		props: {
 			name: String,
-			inProgress: Boolean
+			inProgress: Boolean,
+			width: {
+				type: Number,
+				required: false,
+				default: 700
+			},
+			contentCols: {
+				type: Number,
+				required: false,
+				default: 11
+			},
+			confirmBtn: {
+				type: Boolean,
+				required: false,
+				default: true
+			}
 		},
 
 		data() {

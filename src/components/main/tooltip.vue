@@ -20,11 +20,12 @@
 				currentFolderIndex: (state) => state.folders.currentFolderIndex,
 				currentTodos: (state) => state.folders.currentTodos,
 				isCurrentFolderLoaded: (state) => state.folders.isCurrentFolderLoaded,
-				isUserLogged: (state) => state.user.isLogged
+				isUserLogged: (state) => state.user.isLogged,
+				authInProgress: (state) => state.bars.userSection
  			}),
 
 			tooltipText() {
-				if (!this.isUserLogged) {
+				if (!this.isUserLogged && !this.authInProgress) {
 					return "Sign in";
 				}
 
@@ -60,6 +61,10 @@
 	.tooltip__text {
 		font-size: 28px;
 		color: rgba(0, 0, 0, 0.35);
+
+		.theme--dark & {
+			color: rgba(255, 255, 255, 0.35);
+		}
 
 		@media screen and (max-width: 560px) {
 			font-size: 20px;

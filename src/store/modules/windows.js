@@ -3,7 +3,8 @@ export default {
 		creatingAccount: false,
 		resetPassword: false,
 		creatingFolder: false,
-		creatingTodo: false
+		creatingTodo: false,
+		appSettings: false
 	},
 
 	mutations: {
@@ -21,6 +22,10 @@ export default {
 
 		setCreatingTodoPopup(state, value) {
 			state.creatingTodo = value;
+		},
+
+		setAppSettingsPopup(state, value) {
+			state.appSettings = value;
 		}
 	}
 };

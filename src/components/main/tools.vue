@@ -1,33 +1,42 @@
 <template lang="pug">
-	v-layout(row, justify-space-between)
+	v-layout(row, justify-space-between, align-center)
 		v-select.order-by-select(label="Order by",
+						v-if="showOrderSelect",
 						v-model="orderSelectValue"
 						:items="orderTypes")
 </template>
 
 <script>
+	import { mapState } from "vuex";
+
 	export default {
 		data() {
 			return {
-				orderBy: "" 
+
 			};
 		},
 
 		computed: {
+			...mapState({
+				currentFolderIndex: (state) => state.folders.currentFolderIndex
+			}),
+
+			orderTypes() {
+				return this.$store.state.folders.orderTypes.map( (typeObj) => typeObj.type );
+			},
+
 			orderSelectValue: {
 				get() {
-					return this.orderBy;
+					return this.$store.state.folders.todosOrder;
 				},
 
 				set(value) {
 					this.$store.commit("setTodosOrder", value);
-
-					this.orderBy = value;
 				}
 			},
 
-			orderTypes() {
-				return this.$store.state.folders.orderTypes.map( (typeObj) => typeObj.type );
+			showOrderSelect() {
+				return this.currentFolderIndex !== null;
 			}
 		},
 
@@ -46,5 +55,9 @@
 <style lang="scss">
 	.order-by-select {
 		max-width: 120px;
+	}
+
+	.settings-open-btn-icon {
+		max-width: 24px;
 	}
 </style>
