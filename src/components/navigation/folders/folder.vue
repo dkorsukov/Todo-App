@@ -14,7 +14,7 @@
 				div(v-if="isDataLoaded")
 					span Created {{ created.toLocaleString() }}
 					br
-					span Contains {{ todosCount }} todo
+					span Contains {{ todosCount }} item(-s)
 				.folder-elem__info-progress-container(v-else)
 					v-progress-circular(indeterminate,
 															:size="18",
