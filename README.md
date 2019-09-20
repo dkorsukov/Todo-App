@@ -3,7 +3,7 @@ Created with:
   SCSS,
   Vue.js (Vuex, Vuetify),
   Firebase (backend),
-  Webpack,
+  Webpack 4,
   Material Design Icons (icons font),
   ESLint (lint),
   Babel
