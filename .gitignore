@@ -3,3 +3,6 @@ build/
 package-lock.json
 dev_details/
 api/
+.firebaserc
+firebase.json
+functions/
