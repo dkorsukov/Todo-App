@@ -45,6 +45,7 @@
 
 					api.createUser(this.email, this.password, {
 						name: this.name,
+						email: this.email,
 						registered: ( new Date() ).valueOf()
 					}).then( (data) => {
 						this.$refs.creatingAccountPopup.close();

@@ -86,7 +86,6 @@ export default {
 			});
 
 			state.todosCache[name] = [];
-			console.log(state.todosCache);
 		},
 	
 		deleteFolder(state, folderIndex) {

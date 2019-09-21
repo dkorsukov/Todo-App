@@ -33,7 +33,7 @@
 		mounted() {
 			api.auth.onAuthStateChanged( (user) => {
 				if (user) {
-					this.$store.dispatch("signIn", user.email);
+					this.$store.dispatch("signIn", user.uid);
 				} 
 
 				this.$store.commit("setUserSectionProgressBar", false);

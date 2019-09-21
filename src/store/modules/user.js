@@ -5,6 +5,7 @@ export default {
 		isLogged: false,
 		docRef: null,
 		name: "",
+		email: "",
 		registered: null
 	},
 
@@ -21,19 +22,24 @@ export default {
 			state.name = name;
 		},
 
+		setUserEmail(state, email) {
+			state.email = email;
+		},
+
 		setUserRegistrationDate(state, time) {
 			state.registered = ( new Date(time) ).toLocaleString();
 		}
 	},
 
 	actions: {
-		setUserData({ commit }, { name, regTime }) {
+		setUserData({ commit }, { name, email, regTime }) {
 			commit("setUserName", name);
+			commit("setUserEmail", email);
 			commit( "setUserRegistrationDate", parseInt(regTime) );			
 		},
 
-		signIn({ commit, dispatch }, email) {
-			let docRef = api.database.collection("users").doc(email);
+		signIn({ commit, dispatch }, id) {
+			let docRef = api.database.collection("users").doc(id);
 			commit("setUserDocRef", docRef);
 			dispatch("getFolders");
 
@@ -55,9 +61,10 @@ export default {
 					.then( (doc) => {
 						let data = doc.data();
 
-						if (data.name !== undefined && data.registered !== undefined) {
+						if (data.name !== undefined && data.registered !== undefined && data.email !== undefined) {
 							dispatch("setUserData", {
 								name: data.name,
+								email: data.email,
 								regTime: data.registered
 							});			
 						}	

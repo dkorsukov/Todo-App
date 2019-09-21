@@ -7,7 +7,7 @@
 						span.white--text.headline {{ userInitials }}
 					v-layout.ml-3.mt-2(column)
 						span.title {{ userName }}
-						span.user-email(:title="userDocRef.id") {{ userEmail }}
+						span.user-email(:title="changedEmail") {{ changedEmail }}
 						span.body-1.font-weight-thin(title="Registration date") Since {{ userRegDate }}
 		v-list
 			v-list-tile.account-manage-btn(v-ripple, @click="signOut")
@@ -52,10 +52,10 @@
 			deleteAccount() {
 				this.inProgress = true;
 
-				let userEmail = api.auth.currentUser.email;
+				let userId = api.auth.currentUser.uid;
 				api.auth.currentUser.delete()
 					.then( () => {
-						api.database.collection("users").doc(userEmail).delete()
+						api.database.collection("users").doc(userId).delete()
 							.finally( () => {
 								window.location.reload();
 							} )
@@ -72,7 +72,7 @@
 		computed: {
 			...mapGetters(["userInitials"]),
 			...mapState({
-				userDocRef: (state) => state.user.docRef,
+				userEmail: (state) => state.user.email,
 				userName: (state) => state.user.name,
 				userRegDate: (state) => state.user.registered
 			}),
@@ -82,9 +82,9 @@
 				return colors[ ~~( Math.random() * colors.length ) ];
 			},
 
-			userEmail() {
-				let email = this.userDocRef.id;
-
+			changedEmail() {
+				let email = this.userEmail;
+				return "";
 				return email.length <= 27 ? `(${email})` : email.substr(0, 27) + "...";
 			}
 		}
