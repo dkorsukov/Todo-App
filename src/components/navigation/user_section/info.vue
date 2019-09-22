@@ -37,6 +37,7 @@
 						let prefix = "todo-app/user-data";
 
 						localStorage.removeItem(`${prefix}/name`);
+						localStorage.removeItem(`${prefix}/email`);
 						localStorage.removeItem(`${prefix}/registered`);
 
 						window.location.reload();
@@ -57,6 +58,13 @@
 					.then( () => {
 						api.database.collection("users").doc(userId).delete()
 							.finally( () => {
+								// prefix for local storage props
+								let prefix = "todo-app/user-data";
+		
+								localStorage.removeItem(`${prefix}/name`);
+								localStorage.removeItem(`${prefix}/email`);
+								localStorage.removeItem(`${prefix}/registered`);
+
 								window.location.reload();
 							} )
 					} )
@@ -84,7 +92,7 @@
 
 			changedEmail() {
 				let email = this.userEmail;
-				return "";
+				
 				return email.length <= 27 ? `(${email})` : email.substr(0, 27) + "...";
 			}
 		}

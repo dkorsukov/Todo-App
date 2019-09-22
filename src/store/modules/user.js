@@ -46,12 +46,13 @@ export default {
 			// prefix for local storage props
 			let prefix = "todo-app/user-data",
 					name = localStorage.getItem(`${prefix}/name`),
+					email = localStorage.getItem(`${prefix}/email`),
 					regTime = localStorage.getItem(`${prefix}/registered`);
 
 			// if saved locally set it from local storage
-			if (name && regTime) {
+			if (name && email && regTime) {
 				dispatch("setUserData", {
-					name, regTime
+					name, email, regTime
 				});
 
 				commit("setUserLoggedState", true);
@@ -73,6 +74,7 @@ export default {
 						commit("setUserSectionProgressBar", false);
 
 						localStorage.setItem(`${prefix}/name`, data.name);
+						localStorage.setItem(`${prefix}/email`, data.email);
 						localStorage.setItem(`${prefix}/registered`, data.registered);
 					} );
 			}
