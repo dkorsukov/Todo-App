@@ -5,7 +5,7 @@
 									@close="$refs.creatingAccountForm.reset()",
 									@confirm="createAccount")
 		template(#title)
-			v-icon.offset-left(medium) person
+			v-icon.offset-left.mr-1(medium) person
 			span.offset-all.headline Create new account
 		template(#content)
 			v-form(ref="creatingAccountForm")

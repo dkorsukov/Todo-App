@@ -10,7 +10,7 @@
 					v-layout(row, justify-center, align-center)
 						v-flex(:class="`md${contentCols}`")
 							slot(name="content")
-					v-layout(row, justify-end)
+					v-layout.mt-1(row, justify-end)
 						v-btn(flat, :disabled="inProgress", @click="close") Close
 						v-btn(color="primary", :disabled="inProgress", :loading="inProgress", @click="$emit('confirm')", v-if="confirmBtn") Confirm	
 </template>
@@ -58,8 +58,8 @@
 			},
 
 			showMessage(type, text) {
-				this.messageType = type;
-				this.messageText = text;
+				this.messageType = type === undefined ? "" : type;
+				this.messageText = text === undefined ? "" : text;
 			}
 		},
 
@@ -83,6 +83,6 @@
 	}
 </script>
 
-<style lang="sass">
+<style lang="scss">
 
 </style>

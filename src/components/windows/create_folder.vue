@@ -5,7 +5,7 @@
 									@close="resetForm",
 									@confirm="createFolder")
 		template(#title)
-			v-icon.offset-left(medium) add
+			v-icon.offset-left.mr-1(medium) add
 			span.offset-all.headline Create folder
 		template(#content)
 			v-form(ref="creatingFolderForm")

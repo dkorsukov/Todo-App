@@ -5,7 +5,7 @@
 									@close="$refs.resetPasswordForm.reset()",
 									@confirm="resetPassword")
 		template(#title)
-			v-icon.offset-left(medium) refresh
+			v-icon.offset-left.mr-1(medium) refresh
 			span.offset-all.headline Reset password
 		template(#content)
 			v-form(ref="resetPasswordForm")
