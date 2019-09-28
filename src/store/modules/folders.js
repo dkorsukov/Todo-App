@@ -18,9 +18,6 @@ export default {
 		}, {
 			type: "time",
 			func: (itemA, itemB) => itemA.time < itemB.time ? -1 : 1
-		}, {
-			type: "priority",
-			func: (itemA, itemB) => itemA.priority > itemB.priority ? -1 : 1
 		}],
 		isCurrentFolderLoaded: false,
 		currentTodos: [],
@@ -97,6 +94,9 @@ export default {
 	
 		setCurrentFolderIndex(state, folderIndex) {
 			state.currentFolderIndex = folderIndex;
+
+			let inLS = folderIndex === null ? -1 : folderIndex;
+			localStorage.setItem("todo-app/user-data/selected-folder", inLS);
 		},
 	
 		setFoldersCollectionRef(state, ref) {
@@ -195,6 +195,12 @@ export default {
 	
 					commit("setFoldersLoadedState", true);
 					commit("setFoldersListSectionProgressBar", false);
+
+					let selectedFolder = JSON.parse( localStorage.getItem("todo-app/user-data/selected-folder") );
+
+					if (typeof selectedFolder === "number" && selectedFolder !== -1) {
+						dispatch( "switchCurrentFolder", JSON.parse(selectedFolder) );
+					}					
 				} );
 		},
 	
