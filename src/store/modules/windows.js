@@ -4,7 +4,9 @@ export default {
 		resetPassword: false,
 		creatingFolder: false,
 		creatingTodo: false,
-		appSettings: false
+		appSettings: false,
+		todoImage: false,
+		todoImageURL: ""
 	},
 
 	mutations: {
@@ -26,6 +28,14 @@ export default {
 
 		setAppSettingsPopup(state, value) {
 			state.appSettings = value;
+		},
+
+		setTodoImagePopup(state, value) {
+			state.todoImage = value;
+		},
+
+		setTodoImageURL(state, value) {
+			state.todoImageURL = value;
 		}
 	}
 };

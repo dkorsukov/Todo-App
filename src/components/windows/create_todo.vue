@@ -5,7 +5,7 @@
 									@close="resetForm",
 									@confirm="createTodo")
 		template(#title)
-			v-icon.offset-left(medium) add
+			v-icon.offset-left.mr-1(medium) add
 			span.offset-all.headline Create new task
 		template(#content)
 			v-form(ref="creatingTodoForm")
@@ -13,10 +13,6 @@
 										label="Title*",
 										:rules="titleInputRules",
 										:disabled="inProgress")
-				v-slider(v-model="priorityInputValue", :thumb-size="25",
-								:min="1", :max="9", label="Priority", :disabled="inProgress")
-					template(#thumb-label)
-						span {{ priorityInputValue }}
 				v-textarea(label="Description",
 									v-model="descriptionInputValue",
 									:counter="true",
@@ -57,9 +53,13 @@
 																							:rules="intervalValueInputRules")
 						v-select.ml-2.interval-units-select(:items="intervalSelectItems",
 																								v-model="intervalSelectValue")
+				.file-input-container
+					input(type="file", hidden, @input="attachFile", ref="realFileInput")
+					v-text-field(label="Attach Image", :disabled="inProgress", :rules="fileRules", :value="attachedFileName", readonly, @click="dispatchFileInput")
 </template>
 
 <script>
+	import api from "@api";
 	import { mapState, mapGetters } from "vuex";
 	import popupComponent from "./popup.vue";
 
@@ -68,12 +68,13 @@
 			return {
 				inProgress: false,
 				titleInputValue: "",
-				priorityInputValue: 1,
 				descriptionInputValue: "",
 				todoTimeMode: -1,
 				datePickerValue: "",
 				timePickerValue: "",
 				intervalNumberValue: "10",
+				attachedFileName: "",
+				attachedFile: null,
 				titleInputRules: [
 					(val) => val.length > 0 || "Title is required",
 					(val) => val.length <= 30 || "Title should not be longer than 30 characters"
@@ -101,13 +102,25 @@
 
 				// set a default values
 				this.titleInputValue = "";
-				this.priorityInputValue = 1;
 				this.descriptionInputValue = "";
 				this.todoTimeMode = -1;
 				this.datePickerValue = "";
 				this.timePickerValue = "";
 				this.intervalNumberValue = "10";
+				this.attachedFileName = "";
+				this.attachedFile = null;
 				this.intervalSelectValue = "hours";
+			},
+
+			dispatchFileInput() {
+				this.$refs.realFileInput.click();
+			},
+
+			attachFile() {
+				let rif = this.$refs.realFileInput.files;
+
+				this.attachedFileName = rif[rif.length - 1].name;
+				this.attachedFile = rif[rif.length - 1];
 			},
 
 			createTodo() {
@@ -116,14 +129,17 @@
 						return todoObj.title === this.titleInputValue;
 					} );
 
+					// if doc with this title isn't exist
 					if (titleIndex === -1) {
 						this.inProgress = true;
+
+						let hasImage = this.attachedFile !== null;
 
 						let docData = {
 							created: ( new Date() ).valueOf(),
 							title: this.titleInputValue,
-							priority: this.priorityInputValue,
 							description: this.descriptionInputValue,
+							hasImage,
 							time: ( new Date(`${this.datePickerValue} ${this.timePickerValue}`) ).valueOf()
 						};
 
@@ -171,17 +187,27 @@
 
 								this.$store.dispatch("changeTodosCount", 1);
 
-								this.$refs.creatingTodoPopup.close();
+								if (this.attachedFile !== null) {
+									api.storage.child(`${api.auth.currentUser.uid}/${docData.created}`).put(this.attachedFile)
+										.then( () => {
+
+										} )
+										.finally( () => {
+											this.inProgress = false;
+											this.$refs.creatingTodoPopup.close();
+										} );
+								} else {
+									this.inProgress = false;
+									this.$refs.creatingTodoPopup.close();
+								}
 							} )
 							.catch( (err) => {
-								this.$refs.creatingTodoPopup.showMessage("error", err.code);
-							} )
-							.finally( () => {
 								this.inProgress = false;
+								this.$refs.creatingTodoPopup.showMessage("error", err.code);
 							} )
 					} else {
 						this.$refs.creatingTodoPopup.showMessage("error", "Task with this title is already exists in this folder");
-					}		
+					}
 				}
 			}
 		},
@@ -207,6 +233,13 @@
 						(val) => true
 					];
 				}
+			},
+
+			fileRules() {
+				return [
+					(val) => this.attachedFile ? (this.attachedFile.size / 1024 / 1024 <= 3 || "File shouldn't be bigger than 3MB") : true,
+					(val) => this.attachedFile ? (this.attachedFile.type.includes("image") || "File should be image") : true
+				];
 			}
 		},
 

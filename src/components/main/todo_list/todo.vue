@@ -2,10 +2,9 @@
 	v-menu(absolute, offset-y, :max-width="600", :disabled="inProgress")
 		template(#activator="{ on }")
 			v-card.todo-item.ma-2(ripple, :disabled="inProgress", v-on="on")
-				v-card-title.todo-item__title-container.relative
-					v-avatar(:color="priorityColor", :size="25")
-						span.white--text {{ priority }}
-					span.ml-2.todo-item__title {{ title }}
+				v-card-title.todo-item__title-container.relative.pb-2
+					v-icon.mb-1(small, title="Has attached image", v-if="hasImage") attach_file
+					span.ml-1.todo-item__title {{ title }}
 				v-card-text.pl-4.todo-item__text
 					.todo-item__description
 						slot
@@ -14,19 +13,22 @@
 		v-list.todo-item__actions-container
 			v-list-tile.todo-item__action-btn(v-if="allowToComplete", title="Complete task", ripple, @click="completeTodo")
 				v-icon(color="green") done
+			v-list-tile.todo-item__action-btn(v-if="hasImage", title="Show image", ripple, @click="openImage")
+				v-icon(color="#6495ED") image
 			v-list-tile.todo-item__action-btn(ripple, title="Remove task", @click="removeTodo")
 				v-icon(color="red") delete
 </template>
 
 <script>
+	import api from "@api";
 	import { mapState, mapGetters } from "vuex";
 
 	export default {
 		props: {
 			created: Number,
 			title: String,
-			priority: Number,
 			time: Number,
+			hasImage: Boolean,
 			single: {
 				type: Object,
 				required: false
@@ -116,6 +118,14 @@
 				this.timeInfoText = this.getTimeInfoText();
 			},
 
+			openImage() {
+				api.storage.child(`${api.auth.currentUser.uid}/${this.created}`).getDownloadURL()
+					.then( (imageURL) => {
+						this.$store.commit("setTodoImageURL", imageURL);
+						this.$store.commit("setTodoImagePopup", true);
+					} );	
+			},
+
 			completeTodo() {
 				this.inProgress = true;
 
@@ -167,14 +177,18 @@
 					.then( () => {
 						this.$store.dispatch("changeTodosCount", -1);
 
+						if (this.hasImage) {
+							api.storage.child(`${api.auth.currentUser.uid}/${this.created}`).delete()
+								.finally( () => {
+									this.inProgress = false;
+								} )
+						}		
+
 						/* 	
 								process of removal from view list
 								you can find in file called folders.js
 						*/						
 					} )
-					.finally( () => {
-						this.inProgress = false;
-					} );
 			}
 		},
 
@@ -196,16 +210,6 @@
 
 			withInterval() {
 				return this.interval !== undefined;
-			},
-
-			priorityColor() {
-				if (this.priority >= 8) {
-					return "#C92B36";
-				} else if (this.priority >= 4 && this.priority < 8) {
-					return "#5B649F";
-				} else if (this.priority < 4) {
-					return "#8790CB";
-				}
 			},
 			
 			everyInUnits() {

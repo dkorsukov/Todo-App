@@ -4,7 +4,7 @@
 							:key="index",
 							:created="todo.created",
 							:title="todo.title",
-							:priority="todo.priority",
+							:hasImage="todo.hasImage",
 							:time="todo.time",
 							:single="todo.single",							
 							:interval="todo.interval") {{ todo.description }}

@@ -4,6 +4,7 @@
 		reset-password
 		create-folder
 		create-todo
+		todo-image
 		app-settings
 </template>
 
@@ -12,6 +13,7 @@
 	import resetPassword from "./windows/reset_password.vue";
 	import createFolder from "./windows/create_folder.vue";
 	import createTodo from "./windows/create_todo.vue";
+	import todoImage from "./windows/todo_image.vue";
 	import appSettings from "./windows/app_settings.vue";
 
 	export default {
@@ -20,6 +22,7 @@
 			resetPassword,
 			createFolder,
 			createTodo,
+			todoImage,
 			appSettings
 		}
 	}
