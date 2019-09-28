@@ -78,6 +78,7 @@
 								} )
 								.finally( () => {
 									this.inProgress = false;
+									this.showRemoveMenu = false;
 								} )
 						} else {
 							this.showRemoveError = true;

@@ -40,10 +40,6 @@
 
 		components: {
 			folder
-		},
-
-		mounted() {
-			
 		}
 	}
 </script>
